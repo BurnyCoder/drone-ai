@@ -12,7 +12,7 @@ load_dotenv()
 
 # --- Configuration ---
 # Testing Mode Configuration
-TESTING_MODE_STR = os.getenv("TESTING_MODE", "false") # Default to false if not set
+TESTING_MODE_STR = os.getenv("TESTING_MODE", "true") # Default to false if not set
 TEST_IMAGE_DIR = os.getenv("TEST_IMAGE_DIR", "test_images") # Directory containing test images
 # RTMP URL Configuration
 RTMP_URL = os.getenv("RTMP_URL", "rtmp://192.168.158.143/live/key")
@@ -93,8 +93,9 @@ def analyze_image_with_openai(base64_image):
         return None
 
 def analyze_image_with_yolo(frame):
-    """Analyzes an image frame using YOLO and prints results."""
+    """Analyzes an image frame using YOLO, prints results, and checks for 'person' class."""
     print("Analyzing frame with YOLO...")
+    person_detected = False # Initialize flag
     try:
         # Perform object detection on the frame
         # The frame is already a numpy array, which YOLO can handle directly
@@ -105,40 +106,53 @@ def analyze_image_with_yolo(frame):
             # results[0].show() # This would open a window, might not be ideal for server/RTMP context
             print("\n--- YOLO Detection Results ---")
             # Print basic info about detections
+            # Get class names from the model
+            names = yolo_model.names
+            # Iterate through detected boxes to check for 'person'
+            for box in results[0].boxes:
+                class_id = int(box.cls[0]) # Get class ID
+                if names[class_id].lower() == 'person':
+                    person_detected = True
+                    print("Person detected by YOLO.")
+                    break # No need to check further if one person is found
+
             results[0].show()
             # You could iterate through results[0].boxes, results[0].masks, etc. 
             # to get specific details like bounding boxes, classes, confidences.
             print("----------------------------\n")
             # For now, just returning the results object
-            return results
+            return results, person_detected # Return results and the flag
         else:
             print("No objects detected by YOLO.")
-            return None
+            return None, False # No objects means no person
     except Exception as e:
         print(f"Error during YOLO analysis: {e}")
-        return None
+        return None, False # Error means no person confirmed
 
 def process_frame(frame):
     """Processes a single frame with YOLO and OpenAI."""
     print(f"Processing frame at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     # --- YOLO Analysis ---
-    analyze_image_with_yolo(frame) # Call YOLO analysis
+    yolo_results, person_detected = analyze_image_with_yolo(frame) # Call YOLO analysis
 
     # --- OpenAI Analysis ---
-    # Encode image for OpenAI
-    base64_image = encode_image_to_base64(frame)
+    if person_detected:
+        # Encode image for OpenAI
+        base64_image = encode_image_to_base64(frame)
 
-    # Analyze image
-    print("Sending frame to OpenAI for analysis...")
-    description = analyze_image_with_openai(base64_image)
+        # Analyze image
+        print("Sending frame to OpenAI for analysis (person detected)...")
+        description = analyze_image_with_openai(base64_image)
 
-    if description:
-        print("\n--- OpenAI Analysis Result ---")
-        print(description)
-        print("-----------------------------\n")
+        if description:
+            print("\n--- OpenAI Analysis Result ---")
+            print(description)
+            print("-----------------------------\n")
+        else:
+            print("No description received from OpenAI.") # Added for clarity
     else:
-        print("No description received from OpenAI.") # Added for clarity
+        print("Skipping OpenAI analysis: No person detected by YOLO.")
 
 def run_rtmp_mode():
     """Runs the script in RTMP stream mode."""
