@@ -6,12 +6,9 @@ A project for analyzing video streams from drones using vision AI models.
 
 This application connects to an RTMP video stream, periodically captures frames, and sends them to OpenAI's GPT-4o vision model for analysis. It's designed to provide real-time insights about what the drone is seeing.
 
-## Requirements
+## Before installation
 
-- Python 3.6+
-- OpenCV
-- OpenAI Python SDK
-- python-dotenv
+For DJI Mini 4 Pro drone, setup Monaserver and streaming using RTMP like in https://www.youtube.com/watch?v=ykf3B57elU0
 
 ## Installation
 
