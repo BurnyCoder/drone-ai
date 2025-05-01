@@ -36,7 +36,7 @@ OPENAI_PROMPT="What is in this image?"
 CAPTURE_INTERVAL=5
 
 # Testing Mode (Optional)
-TESTING_MODE=true # Set to true to enable testing mode, false or omit for RTMP mode
+TESTING_MODE=false # Set to true to enable testing mode, false or omit for RTMP mode (default)
 TEST_IMAGE_DIR=./test_images # Path to the directory containing images for testing mode
 ```
 
@@ -46,8 +46,8 @@ TEST_IMAGE_DIR=./test_images # Path to the directory containing images for testi
 - `RTMP_URL` (required if `TESTING_MODE` is false): The RTMP stream URL to connect to
 - `OPENAI_PROMPT` (optional): The prompt to send to OpenAI with the image (default: "What is in this image?")
 - `CAPTURE_INTERVAL` (optional): How often to capture/analyze frames in seconds (default: 5). In testing mode, this is the delay between processing each image.
-- `TESTING_MODE` (optional): Set to `true` to enable testing mode, `false` or omit to use RTMP stream mode (default: `false`)
-- `TEST_IMAGE_DIR` (required if `TESTING_MODE` is true): The path to the directory containing image files (`.jpg`, `.png`, etc.) to be processed in testing mode.
+- `TESTING_MODE` (optional): Set to `true` to enable testing mode. Defaults to `false` (RTMP stream mode) if omitted.
+- `TEST_IMAGE_DIR` (required if `TESTING_MODE` is `true`): The path to the directory containing image files (`.jpg`, `.png`, etc.) to be processed in testing mode.
 
 ## Usage
 

@@ -12,7 +12,7 @@ load_dotenv()
 
 # --- Configuration ---
 # Testing Mode Configuration
-TESTING_MODE_STR = os.getenv("TESTING_MODE", "true") # Default to false if not set
+TESTING_MODE_STR = os.getenv("TESTING_MODE", "false") # Default to false if not set
 TEST_IMAGE_DIR = os.getenv("TEST_IMAGE_DIR", "test_images") # Directory containing test images
 # RTMP URL Configuration
 RTMP_URL = os.getenv("RTMP_URL", "rtmp://192.168.158.143/live/key")
