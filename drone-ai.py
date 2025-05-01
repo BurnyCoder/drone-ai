@@ -12,10 +12,10 @@ load_dotenv()
 
 # --- Configuration ---
 # Testing Mode Configuration
-TESTING_MODE_STR = os.getenv("TESTING_MODE", "true") # Default to false if not set
+TESTING_MODE_STR = os.getenv("TESTING_MODE", "false") # Default to false if not set
 TEST_IMAGE_DIR = os.getenv("TEST_IMAGE_DIR", "test_images") # Directory containing test images
 # RTMP URL Configuration
-RTMP_URL = os.getenv("RTMP_URL", "rtmp://192.168.158.143/live/key")
+RTMP_URL = os.getenv("RTMP_URL", "rtmp://192.168.15.143/live/key")
 # Make sure to set the OPENAI_API_KEY environment variable
 # You can get one from https://platform.openai.com/account/api-keys
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -96,50 +96,51 @@ def analyze_image_with_openai(base64_image):
         return None
 
 def analyze_image_with_yolo(frame):
-    """Analyzes an image frame using YOLO, prints results, and checks for 'person' class."""
+    """Analyzes an image frame using YOLO and prints results."""
     print("Analyzing frame with YOLO...")
-    person_detected = False # Initialize flag
     try:
         # Perform object detection on the frame
-        # The frame is already a numpy array, which YOLO can handle directly
-        results = yolo_model(frame) 
+        results = yolo_model(frame)
 
-        # Process and print results (or return them)
         if results:
-            # results[0].show() # This would open a window, might not be ideal for server/RTMP context
             print("\n--- YOLO Detection Results ---")
-            # Print basic info about detections
-            # Get class names from the model
-            names = yolo_model.names
-            # Iterate through detected boxes to check for 'person'
-            for box in results[0].boxes:
-                class_id = int(box.cls[0]) # Get class ID
-                if names[class_id].lower() == 'person':
-                    person_detected = True
-                    print("Person detected by YOLO.")
-                    break # No need to check further if one person is found
-
+            # Display results (opens a window)
             results[0].show()
-            # You could iterate through results[0].boxes, results[0].masks, etc. 
-            # to get specific details like bounding boxes, classes, confidences.
             print("----------------------------\n")
-            # For now, just returning the results object
-            return results, person_detected # Return results and the flag
+            return results # Return the full results object
         else:
             print("No objects detected by YOLO.")
-            return None, False # No objects means no person
+            return None
     except Exception as e:
         print(f"Error during YOLO analysis: {e}")
-        return None, False # Error means no person confirmed
+        return None
+
+def check_for_person(results, model_names):
+    """Checks YOLO results for the presence of a 'person' class."""
+    if not results or not results[0].boxes:
+        return False # No results or no boxes means no person
+
+    for box in results[0].boxes:
+        class_id = int(box.cls[0]) # Get class ID
+        if model_names[class_id].lower() == 'person':
+            print("Person detected by YOLO.")
+            return True # Person found
+    return False # No person found after checking all boxes
 
 def process_frame(frame):
     """Processes a single frame with YOLO and OpenAI."""
     print(f"Processing frame at {time.strftime('%Y-%m-%d %H:%M:%S')}")
 
     # --- YOLO Analysis ---
-    yolo_results, person_detected = analyze_image_with_yolo(frame) # Call YOLO analysis
+    yolo_results = analyze_image_with_yolo(frame) # Call YOLO analysis
+
+    # --- Check for Person ---
+    person_detected = False # Default to false
+    if yolo_results:
+        person_detected = check_for_person(yolo_results, yolo_model.names) # Check results for a person
 
     # --- OpenAI Analysis ---
+    # Condition to send to OpenAI: EITHER the condition is disabled OR a person was detected
     if not OPENAI_CONDITION_PERSON or person_detected:
         # Encode image for OpenAI
         base64_image = encode_image_to_base64(frame)

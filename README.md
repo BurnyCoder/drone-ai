@@ -73,3 +73,5 @@ The application will:
 - YOLO results are displayed in a separate window (`results[0].show()`). Press any key in that window to proceed to the next frame/analysis
 - For displaying the raw video feed locally (without YOLO boxes), uncomment the `cv2.imshow` sections in the RTMP mode code
 
+## Todo
+
