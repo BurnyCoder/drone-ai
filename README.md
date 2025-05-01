@@ -34,37 +34,31 @@ Create a `.env` file in the project root directory with the following variables:
 # Required: Your OpenAI API key
 OPENAI_API_KEY=your_openai_api_key
 
-# Required if TESTING_MODE=false: The RTMP stream URL
+# Required if TESTING_MODE=false: The RTMP stream URL to connect to
 RTMP_URL=rtmp://your-rtmp-server/live/key
 
-# Optional: Prompt for OpenAI Vision API
+# Optional: Prompt for OpenAI Vision API (default: "What is in this image?")
 OPENAI_PROMPT="What is in this image?"
 
-# Optional: Interval (seconds) between frame captures/processing
+# Optional: Interval (seconds) between frame captures/processing (default: 5).
+# In testing mode, this acts as a delay between processing each image file.
 CAPTURE_INTERVAL=5
 
-# Optional: Enable Testing Mode (default: false)
-# Set to true to read from TEST_IMAGE_DIR instead of RTMP stream
+# Optional: Enable Testing Mode (default: false).
+# Set to true to read from TEST_IMAGE_DIR instead of RTMP stream.
+# Defaults to false (RTMP stream mode) if omitted.
 TESTING_MODE=false
 
-# Optional: Directory for test images (required if TESTING_MODE=true)
+# Optional: Directory for test images (required if TESTING_MODE=true).
+# Path to the directory containing image files (.jpg, .jpeg, .png, etc.) to be processed in testing mode.
 TEST_IMAGE_DIR=./test_images
 
-# Optional: OpenAI Analysis Condition (default: true)
-# Set to true to only send images to OpenAI if YOLO detects a 'person'
-# Set to false to always send images to OpenAI after YOLO analysis
+# Optional: OpenAI Analysis Condition (default: true).
+# Set to true to only send images to OpenAI if YOLO detects a 'person'.
+# Set to false to always send images to OpenAI after YOLO analysis.
+# Defaults to true if omitted.
 OPENAI_CONDITION_PERSON=true
 ```
-
-### Configuration Options
-
-- `OPENAI_API_KEY` (required): Your OpenAI API key
-- `RTMP_URL` (required if `TESTING_MODE` is false): The RTMP stream URL to connect to
-- `OPENAI_PROMPT` (optional): The prompt to send to OpenAI with the image (default: "What is in this image?")
-- `CAPTURE_INTERVAL` (optional): How often to capture/analyze frames in seconds (default: 5). In testing mode, this acts as a delay between processing each image file.
-- `TESTING_MODE` (optional): Set to `true` to enable testing mode. Defaults to `false` (RTMP stream mode) if omitted.
-- `TEST_IMAGE_DIR` (required if `TESTING_MODE` is `true`): The path to the directory containing image files (`.jpg`, `.jpeg`, `.png`, etc.) to be processed in testing mode.
-- `OPENAI_CONDITION_PERSON` (optional): Set to `true` to only send images to OpenAI if YOLO detects a person. Set to `false` to always send the image to OpenAI after YOLO analysis. Defaults to `true` if omitted.
 
 ## Usage
 
