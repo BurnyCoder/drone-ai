@@ -38,6 +38,8 @@ CAPTURE_INTERVAL=5
 # Testing Mode (Optional)
 TESTING_MODE=false # Set to true to enable testing mode, false or omit for RTMP mode (default)
 TEST_IMAGE_DIR=./test_images # Path to the directory containing images for testing mode
+# OpenAI Analysis Condition (Optional)
+OPENAI_CONDITION_PERSON=true # Set to true to only send images to OpenAI if YOLO detects a person (default). Set to false to always send.
 ```
 
 ### Configuration Options
@@ -48,6 +50,7 @@ TEST_IMAGE_DIR=./test_images # Path to the directory containing images for testi
 - `CAPTURE_INTERVAL` (optional): How often to capture/analyze frames in seconds (default: 5). In testing mode, this is the delay between processing each image.
 - `TESTING_MODE` (optional): Set to `true` to enable testing mode. Defaults to `false` (RTMP stream mode) if omitted.
 - `TEST_IMAGE_DIR` (required if `TESTING_MODE` is `true`): The path to the directory containing image files (`.jpg`, `.png`, etc.) to be processed in testing mode.
+- `OPENAI_CONDITION_PERSON` (optional): Set to `true` to only send images to OpenAI if YOLO detects a person. Set to `false` to always send the image to OpenAI after YOLO analysis. Defaults to `true` if omitted.
 
 ## Usage
 
@@ -61,7 +64,7 @@ The application will:
 1. Connect to the specified RTMP stream **or** prepare to read from the test image directory based on `TESTING_MODE`
 2. Capture/Read frames at the defined `CAPTURE_INTERVAL`
 3. Perform object detection using YOLO and display results (bounding boxes on the image)
-4. Send each captured frame to OpenAI's vision API
+4. Send each captured frame to OpenAI's vision API (conditionally, based on `OPENAI_CONDITION_PERSON` and YOLO results).
 5. Print the OpenAI analysis to the console
 
 ## Notes
@@ -69,3 +72,4 @@ The application will:
 - In RTMP mode, the application will attempt to reconnect if the stream is disconnected
 - YOLO results are displayed in a separate window (`results[0].show()`). Press any key in that window to proceed to the next frame/analysis
 - For displaying the raw video feed locally (without YOLO boxes), uncomment the `cv2.imshow` sections in the RTMP mode code
+

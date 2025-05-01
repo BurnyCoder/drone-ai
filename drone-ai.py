@@ -23,8 +23,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_PROMPT = os.getenv("OPENAI_PROMPT", "What is in this image?") # Default prompt if not set
 # How often to capture and send frame (in seconds)
 CAPTURE_INTERVAL_STR = os.getenv("CAPTURE_INTERVAL", "5") # Default interval if not set
+# OpenAI Analysis Condition
+OPENAI_CONDITION_PERSON_STR = os.getenv("OPENAI_CONDITION_PERSON", "true") # Default to true
 
 TESTING_MODE = TESTING_MODE_STR.lower() == 'true'
+OPENAI_CONDITION_PERSON = OPENAI_CONDITION_PERSON_STR.lower() == 'true'
 
 if not OPENAI_API_KEY:
     print("Error: OPENAI_API_KEY environment variable not set.")
@@ -137,12 +140,15 @@ def process_frame(frame):
     yolo_results, person_detected = analyze_image_with_yolo(frame) # Call YOLO analysis
 
     # --- OpenAI Analysis ---
-    if person_detected:
+    if not OPENAI_CONDITION_PERSON or person_detected:
         # Encode image for OpenAI
         base64_image = encode_image_to_base64(frame)
 
         # Analyze image
-        print("Sending frame to OpenAI for analysis (person detected)...")
+        if OPENAI_CONDITION_PERSON:
+            print("Sending frame to OpenAI for analysis (person detected)...")
+        else:
+            print("Sending frame to OpenAI for analysis (condition disabled)...")
         description = analyze_image_with_openai(base64_image)
 
         if description:
@@ -151,7 +157,7 @@ def process_frame(frame):
             print("-----------------------------\n")
         else:
             print("No description received from OpenAI.") # Added for clarity
-    else:
+    elif OPENAI_CONDITION_PERSON: # Only print skip message if the condition is enabled but no person found
         print("Skipping OpenAI analysis: No person detected by YOLO.")
 
 def run_rtmp_mode():
